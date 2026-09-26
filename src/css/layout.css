@@ -1,0 +1,422 @@
+/* ============================================================
+   Amulet AI — Layout Styles
+   ============================================================ */
+
+/* ============================================================
+   App Shell
+   ============================================================ */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-height: 100vh;
+  transition: grid-template-columns var(--transition-base);
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: 0 1fr;
+}
+
+.app-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  padding-bottom: calc(var(--nav-height) + var(--space-4));
+}
+
+/* ============================================================
+   Map Page Layout
+   ============================================================ */
+
+.map-page {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.map-page-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-page-sidebar {
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.map-page-sidebar-header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.map-page-sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+/* ============================================================
+   SOS Overlay
+   ============================================================ */
+
+.sos-overlay {
+  position: absolute;
+  bottom: calc(var(--nav-height) + var(--space-4));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+}
+
+/* ============================================================
+   Places Page Layout
+   ============================================================ */
+
+.places-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ============================================================
+   Chat Page Layout
+   ============================================================ */
+
+.chat-page {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ============================================================
+   Meds Page Layout
+   ============================================================ */
+
+.meds-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.meds-section {
+  margin-bottom: var(--space-6);
+}
+
+.meds-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.meds-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.meds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ============================================================
+   Driving Page Layout
+   ============================================================ */
+
+.driving-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.driving-reports {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.driving-toggle {
+  display: inline-flex;
+  background: var(--color-surface-lighter);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.driving-toggle-btn {
+  padding: var(--space-1) var(--space-3);
+  border-radius: calc(var(--radius-md) - 2px);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.driving-toggle-btn.active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================================
+   Settings Page Layout
+   ============================================================ */
+
+.settings-page {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.settings-section {
+  margin-bottom: var(--space-6);
+}
+
+.settings-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-3);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.settings-item-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.settings-item-description {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ============================================================
+   Admin Page Layout
+   ============================================================ */
+
+.admin-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ============================================================
+   Responsive Breakpoints
+   ============================================================ */
+
+/* --- Mobile (default, < 768px) --- */
+@media (max-width: 767px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell .sidebar {
+    position: fixed;
+    z-index: var(--z-sticky);
+    transform: translateX(-100%);
+  }
+
+  .app-shell .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .map-page {
+    grid-template-columns: 1fr;
+  }
+
+  .map-page-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: var(--z-sticky);
+    transform: translateX(100%);
+    transition: transform var(--transition-base);
+  }
+
+  .map-page-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .chat-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: var(--z-sticky);
+    transform: translateX(-100%);
+    transition: transform var(--transition-base);
+  }
+
+  .chat-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .places-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meds-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .driving-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .toast-container {
+    top: auto;
+    bottom: calc(var(--nav-height) + var(--space-4));
+    right: var(--space-4);
+    left: var(--space-4);
+    max-width: none;
+  }
+
+  .incident-alert {
+    top: var(--space-2);
+    width: calc(100% - var(--space-4));
+  }
+
+  .layer-controls {
+    top: var(--space-2);
+    right: var(--space-2);
+  }
+
+  .sos-overlay {
+    bottom: calc(var(--nav-height) + var(--space-2));
+  }
+}
+
+/* --- Tablet (768px - 1023px) --- */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .app-shell {
+    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+  }
+
+  .map-page {
+    grid-template-columns: 1fr 260px;
+  }
+
+  .places-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .meds-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* --- Desktop (>= 1024px) --- */
+@media (min-width: 1024px) {
+  .app-shell {
+    grid-template-columns: var(--sidebar-width) 1fr;
+  }
+
+  .places-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .meds-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* --- Large Desktop (>= 1440px) --- */
+@media (min-width: 1440px) {
+  .places-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .meds-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================================
+   Print Styles
+   ============================================================ */
+
+@media print {
+  .nav-bar,
+  .sidebar,
+  .layer-controls,
+  .sos-overlay,
+  .toast-container,
+  .modal-backdrop {
+    display: none !important;
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

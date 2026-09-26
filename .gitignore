@@ -1,0 +1,42 @@
+# Rust
+/target
+**/target
+**/*.rs.bk
+
+# Node
+node_modules
+dist
+*.local
+
+# Tauri
+src-tauri/target
+src-tauri/gen
+
+# Environment
+.env
+.env.local
+*.env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+npm-debug.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
