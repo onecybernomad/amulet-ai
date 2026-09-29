@@ -22,6 +22,11 @@ pub async fn handle_chat_message(
 
     tracing::debug!("Chat message from user {} in room {}: {}", user_id, room_id, body);
 
+    // Persist to database
+    if let Err(e) = crate::db::chat::insert_message(&hub.db_pool, room_id, user_id, &body).await {
+        tracing::error!("Failed to persist chat message: {}", e);
+    }
+
     // Create the message entity
     let message = crate::types::ChatMessage {
         id: Uuid::new_v4(),

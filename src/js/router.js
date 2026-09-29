@@ -6,11 +6,16 @@ import { store } from './state.js';
 import { api } from './api.js';
 
 const ROUTES = {
+  '/login': () => import('./pages/login-page.js'),
+  '/signup': () => import('./pages/signup-page.js'),
+  '/onboarding': () => import('./pages/onboarding-page.js'),
   '/map': () => import('./pages/map-page.js'),
   '/places': () => import('./pages/places-page.js'),
   '/chat': () => import('./pages/chat-page.js'),
   '/meds': () => import('./pages/meds-page.js'),
   '/driving': () => import('./pages/driving-page.js'),
+  '/history': () => import('./pages/history-page.js'),
+  '/assistance': () => import('./pages/assistance-page.js'),
   '/settings': () => import('./pages/settings-page.js'),
   '/admin': () => import('./pages/admin-page.js'),
 };

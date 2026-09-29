@@ -3,6 +3,7 @@ use std::collections::VecDeque;
 use tracing::debug;
 
 /// A rolling window of sensor readings for classification.
+#[derive(Debug, Clone)]
 pub struct SensorWindow {
     accel_buffer: VecDeque<AccelerometerData>,
     gyro_buffer: VecDeque<GyroscopeData>,
@@ -138,5 +139,100 @@ impl SensorWindow {
     /// Returns true if the window is empty.
     pub fn is_empty(&self) -> bool {
         self.accel_buffer.is_empty()
+    }
+
+    /// Compute the crash severity score (0.0 - 1.0).
+    ///
+    /// Based on peak acceleration, jerk, and angular velocity.
+    /// Higher values indicate more severe crashes.
+    pub fn crash_severity(&self) -> f64 {
+        if self.accel_buffer.is_empty() {
+            return 0.0;
+        }
+
+        let g = 9.81;
+
+        // Peak acceleration in g-forces
+        let peak_accel = self.accel_buffer.iter()
+            .map(|r| (r.x * r.x + r.y * r.y + r.z * r.z).sqrt() / g)
+            .fold(0.0, f64::max);
+
+        // Peak angular velocity in rad/s
+        let peak_angular = self.gyro_buffer.iter()
+            .map(|g| (g.x * g.x + g.y * g.y + g.z * g.z).sqrt())
+            .fold(0.0, f64::max);
+
+        // Jerk magnitude
+        let jerk = self.max_jerk();
+
+        // Weighted severity score
+        let accel_score = ((peak_accel - 3.0) / 12.0).clamp(0.0, 1.0);
+        let angular_score = ((peak_angular - 5.0) / 15.0).clamp(0.0, 1.0);
+        let jerk_score = ((jerk - 100.0) / 500.0).clamp(0.0, 1.0);
+
+        (accel_score * 0.5 + angular_score * 0.3 + jerk_score * 0.2).clamp(0.0, 1.0)
+    }
+
+    /// Classify crash severity into a human-readable level.
+    pub fn classify_crash_severity(&self) -> CrashSeverity {
+        let score = self.crash_severity();
+        if score < 0.3 {
+            CrashSeverity::Minor
+        } else if score < 0.6 {
+            CrashSeverity::Moderate
+        } else {
+            CrashSeverity::Severe
+        }
+    }
+
+    /// Check if this is likely a false positive.
+    ///
+    /// Filters out common false positives:
+    /// - Phone dropped on a table (short duration, low angular velocity)
+    /// - Hard braking without impact (high jerk but no angular velocity)
+    /// - Sudden stop (high deceleration but no rotation)
+    pub fn is_false_positive(&self) -> bool {
+        if self.accel_buffer.len() < 3 {
+            return true; // Not enough data
+        }
+
+        let g = 9.81;
+        let peak_accel = self.accel_buffer.iter()
+            .map(|r| (r.x * r.x + r.y * r.y + r.z * r.z).sqrt() / g)
+            .fold(0.0, f64::max);
+
+        let peak_angular = self.gyro_buffer.iter()
+            .map(|g| (g.x * g.x + g.y * g.y + g.z * g.z).sqrt())
+            .fold(0.0, f64::max);
+
+        // If high acceleration but very low angular velocity, likely a drop not a crash
+        if peak_accel > 3.0 * g && peak_angular < 1.0 {
+            return true;
+        }
+
+        // If the event was very brief (less than 3 readings), likely noise
+        if self.accel_buffer.len() < 5 && peak_accel < 4.0 * g {
+            return true;
+        }
+
+        false
+    }
+}
+
+/// Crash severity levels.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CrashSeverity {
+    Minor,
+    Moderate,
+    Severe,
+}
+
+impl std::fmt::Display for CrashSeverity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CrashSeverity::Minor => write!(f, "minor"),
+            CrashSeverity::Moderate => write!(f, "moderate"),
+            CrashSeverity::Severe => write!(f, "severe"),
+        }
     }
 }

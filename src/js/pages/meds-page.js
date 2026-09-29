@@ -42,11 +42,16 @@ export class MedsPage {
     this.container.appendChild(this.filterBar);
     this._renderFilters();
 
+    // Upcoming schedules
+    this.upcomingEl = createElement('div', { class: 'upcoming-schedules' });
+    this.container.appendChild(this.upcomingEl);
+
     // Medications grid
     this.grid = createElement('div', { class: 'meds-grid' });
     this.container.appendChild(this.grid);
 
     this._renderMedications();
+    this._loadUpcomingSchedules();
   }
 
   /**
@@ -111,15 +116,59 @@ export class MedsPage {
    */
   async _handleMedAction(medId, action) {
     try {
-      await api.post(`/medications/${medId}/log`, { action, timestamp: Date.now() });
+      await api.post(`/api/medications/${medId}/adherence`, { taken: action === 'taken', notes: action === 'skipped' ? 'skipped' : null });
+
+      // Fetch updated stats
+      const [statsRes, streakRes] = await Promise.all([
+        api.get(`/api/medications/${medId}/adherence/stats`),
+        api.get(`/api/medications/${medId}/adherence/streak`),
+      ]);
+
       // Update local state
       const med = this.medications.find(m => m.id === medId);
       if (med) {
-        med.streak = action === 'taken' ? (med.streak || 0) + 1 : 0;
+        med.streak = streakRes.data?.streak || 0;
+        med.adherenceRate = statsRes.data?.rate || 0;
         this._renderMedications();
       }
     } catch (err) {
       console.error('[MedsPage] Failed to log action:', err);
+    }
+  }
+
+  /**
+   * Load upcoming medication schedules.
+   * @private
+   */
+  async _loadUpcomingSchedules() {
+    try {
+      const response = await api.get('/api/medications/upcoming');
+      this.upcomingSchedules = response.data || [];
+      this._renderUpcomingSchedules();
+    } catch (err) {
+      console.error('[MedsPage] Failed to load upcoming schedules:', err);
+    }
+  }
+
+  /**
+   * Render upcoming schedules section.
+   * @private
+   */
+  _renderUpcomingSchedules() {
+    if (!this.upcomingEl) return;
+    clearElement(this.upcomingEl);
+
+    if (this.upcomingSchedules.length === 0) return;
+
+    const title = createElement('h3', { class: 'upcoming-title' }, 'Next 24 Hours');
+    this.upcomingEl.appendChild(title);
+
+    for (const sched of this.upcomingSchedules) {
+      const item = createElement('div', { class: 'upcoming-item' });
+      item.appendChild(createElement('span', { class: 'upcoming-time' }, formatTime(sched.scheduled_time)));
+      item.appendChild(createElement('span', { class: 'upcoming-name' }, sched.medication_name));
+      item.appendChild(createElement('span', { class: 'upcoming-dosage' }, sched.dosage));
+      this.upcomingEl.appendChild(item);
     }
   }
 

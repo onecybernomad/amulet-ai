@@ -4,15 +4,49 @@ use uuid::Uuid;
 
 // ─── Entity Types ────────────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
     pub id: Uuid,
     pub email: String,
     pub display_name: String,
+    pub phone: Option<String>,
+    pub avatar_url: Option<String>,
+    pub subscription_tier: String,
+    #[serde(skip_serializing)]
+    pub password_hash: String,
+    pub failed_login_attempts: i64,
+    pub locked_until: Option<DateTime<Utc>>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+/// User profile returned by the API (no password_hash).
+#[derive(Debug, Clone, Serialize)]
+pub struct UserProfile {
+    pub id: Uuid,
+    pub email: String,
+    pub display_name: String,
+    pub phone: Option<String>,
+    pub avatar_url: Option<String>,
+    pub subscription_tier: String,
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+impl From<User> for UserProfile {
+    fn from(user: User) -> Self {
+        Self {
+            id: user.id,
+            email: user.email,
+            display_name: user.display_name,
+            phone: user.phone,
+            avatar_url: user.avatar_url,
+            subscription_tier: user.subscription_tier,
+            created_at: user.created_at,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Circle {
     pub id: Uuid,
     pub name: String,
@@ -21,7 +55,7 @@ pub struct Circle {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Place {
     pub id: Uuid,
     pub circle_id: Uuid,
@@ -41,7 +75,7 @@ pub struct LocationPing {
     pub timestamp: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Incident {
     pub id: Uuid,
     pub circle_id: Uuid,
@@ -53,7 +87,7 @@ pub struct Incident {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Medication {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -63,7 +97,7 @@ pub struct Medication {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatMessage {
     pub id: Uuid,
     pub room_id: Uuid,
@@ -72,15 +106,21 @@ pub struct ChatMessage {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DrivingSession {
     pub id: Uuid,
     pub user_id: Uuid,
     pub started_at: DateTime<Utc>,
     pub ended_at: Option<DateTime<Utc>>,
+    pub distance_km: Option<f64>,
+    pub max_speed: Option<f64>,
+    pub avg_speed: Option<f64>,
+    pub harsh_braking_count: Option<i64>,
+    pub rapid_acceleration_count: Option<i64>,
+    pub phone_usage_count: Option<i64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Subscription {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -91,7 +131,7 @@ pub struct Subscription {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TileTracker {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -169,15 +209,60 @@ pub struct OtpVerifyRequest {
     pub code: String,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct UpdateUserRequest {
+    pub display_name: Option<String>,
+    pub phone: Option<String>,
+    pub avatar_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RefreshTokenRequest {
+    pub refresh_token: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct RefreshTokenResponse {
+    pub token: String,
+    pub refresh_token: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct LogoutRequest {
+    pub refresh_token: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PasswordResetRequest {
+    pub email: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PasswordResetConfirmRequest {
+    pub token: String,
+    pub new_password: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct EmailVerifyRequest {
+    pub email: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct EmailVerifyConfirmRequest {
+    pub token: String,
+}
+
 // ─── Response Types ──────────────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Serialize)]
 pub struct AuthResponse {
     pub token: String,
-    pub user: User,
+    pub refresh_token: String,
+    pub user: UserProfile,
 }
 
-#[derive(Debug, Clone, Serialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize)]
 pub struct MemberLocationResponse {
     pub user_id: Uuid,
     pub latitude: f64,
@@ -189,6 +274,74 @@ pub struct MemberLocationResponse {
 pub struct GeofenceAlertResponse {
     pub place_name: String,
     pub entered: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GeofenceEvent {
+    pub id: Uuid,
+    pub place_id: Uuid,
+    pub place_name: String,
+    pub circle_id: Uuid,
+    pub user_id: Uuid,
+    pub event_type: String,
+    pub latitude: f64,
+    pub longitude: f64,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IncidentResponse {
+    pub id: Uuid,
+    pub incident_id: Uuid,
+    pub user_id: Uuid,
+    pub action: String,
+    pub note: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct SosTriggerRequest {
+    pub circle_id: Uuid,
+    pub latitude: f64,
+    pub longitude: f64,
+    pub silent: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct SosAcknowledgeRequest {
+    pub incident_id: Uuid,
+    pub action: String,
+    pub note: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SensorReading {
+    pub accel_x: f64,
+    pub accel_y: f64,
+    pub accel_z: f64,
+    pub gyro_x: f64,
+    pub gyro_y: f64,
+    pub gyro_z: f64,
+    pub timestamp: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DetectionResult {
+    pub fall_detected: bool,
+    pub fall_state: String,
+    pub crash_detected: bool,
+    pub crash_state: String,
+    pub crash_severity: Option<String>,
+    pub is_false_positive: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FallAlert {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub status: String,
+    pub created_at: DateTime<Utc>,
+    pub acknowledged_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Clone, Serialize)]

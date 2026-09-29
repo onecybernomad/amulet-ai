@@ -8,9 +8,10 @@ const HOLD_DURATION = 2000; // 2 seconds
 const COUNTDOWN_INTERVAL = 50;
 
 export class SOSButton {
-  constructor(container, onActivate) {
+  constructor(container, onActivate, options = {}) {
     this.container = container;
     this.onActivate = onActivate;
+    this.silentMode = options.silentMode || false;
     this.holdTimer = null;
     this.countdownTimer = null;
     this.remaining = HOLD_DURATION;
@@ -102,12 +103,21 @@ export class SOSButton {
 
     // Trigger Tauri invoke or callback
     if (window.__TAURI__) {
-      window.__TAURI__.invoke('trigger_sos').catch(err => {
+      window.__TAURI__.invoke('trigger_sos', { silent: this.silentMode }).catch(err => {
         console.error('[SOS] Tauri invoke failed:', err);
       });
     }
 
-    if (this.onActivate) this.onActivate();
+    // Also send via WebSocket if available
+    if (window.__WS__ && window.__WS__.readyState === WebSocket.OPEN) {
+      window.__WS__.send('sos', {
+        latitude: this.lastLat || 0,
+        longitude: this.lastLng || 0,
+        silent: this.silentMode,
+      });
+    }
+
+    if (this.onActivate) this.onActivate(this.silentMode);
 
     // Auto-deactivate after 10 seconds
     this.autoDeactivateTimer = setTimeout(() => this._deactivate(), 10000);

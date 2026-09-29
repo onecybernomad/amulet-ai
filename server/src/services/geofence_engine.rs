@@ -1,4 +1,5 @@
-use geo::{Distance, Haversine, Point};
+use geo::Point;
+use geo::HaversineDistance;
 use crate::types::Place;
 
 /// Result of a geofence check.
@@ -16,7 +17,7 @@ pub fn check(lat: f64, lng: f64, places: &[Place]) -> Option<GeofenceEvent> {
 
     for place in places {
         let place_point = Point::new(place.longitude, place.latitude);
-        let distance = Haversine::distance(user_point, place_point);
+        let distance = user_point.haversine_distance(&place_point);
 
         if distance <= place.radius_meters {
             tracing::info!(
@@ -43,7 +44,7 @@ pub fn check_exit(lat: f64, lng: f64, places: &[Place], previously_inside: &[Str
     for place_name in previously_inside {
         if let Some(place) = places.iter().find(|p| &p.name == place_name) {
             let place_point = Point::new(place.longitude, place.latitude);
-            let distance = Haversine::distance(user_point, place_point);
+            let distance = user_point.haversine_distance(&place_point);
 
             if distance > place.radius_meters {
                 tracing::info!(

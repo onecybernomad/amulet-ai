@@ -18,7 +18,9 @@ export class ApiClient {
     this.baseURL = baseURL || window.__API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
     this.token = get('auth_token', null);
     this.refreshToken = get('refresh_token', null);
+    this.tokenExpiresAt = get('auth_token_expires_at', null);
     this._refreshPromise = null;
+    this._refreshTimer = null;
   }
 
   /**
@@ -48,13 +50,79 @@ export class ApiClient {
   }
 
   /**
+   * Set both access and refresh tokens from an auth response.
+   * @param {Object} data - Response containing token and refresh_token
+   */
+  setTokens(data) {
+    if (data.token) this.setToken(data.token);
+    if (data.refresh_token) this.setRefreshToken(data.refresh_token);
+    this._scheduleProactiveRefresh();
+  }
+
+  /**
+   * Decode JWT token to get expiration time.
+   * @param {string} token - JWT token
+   * @returns {number|null} Expiration timestamp in seconds, or null if invalid
+   */
+  _getTokenExpiry(token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Schedule proactive token refresh before expiry.
+   * Refreshes 1 minute before the token expires.
+   * @private
+   */
+  _scheduleProactiveRefresh() {
+    this._clearProactiveRefresh();
+
+    if (!this.token) return;
+
+    const expiry = this._getTokenExpiry(this.token);
+    if (!expiry) return;
+
+    const now = Math.floor(Date.now() / 1000);
+    const refreshAt = expiry - now - 60; // Refresh 1 minute before expiry
+
+    if (refreshAt <= 0) {
+      // Token already expired or about to expire, refresh immediately
+      this._refreshAccessToken().catch(() => {});
+      return;
+    }
+
+    console.log(`[API] Scheduling proactive token refresh in ${refreshAt}s`);
+    this._refreshTimer = setTimeout(() => {
+      this._refreshAccessToken().catch(() => {});
+    }, refreshAt * 1000);
+  }
+
+  /**
+   * Clear the proactive refresh timer.
+   * @private
+   */
+  _clearProactiveRefresh() {
+    if (this._refreshTimer) {
+      clearTimeout(this._refreshTimer);
+      this._refreshTimer = null;
+    }
+  }
+
+  /**
    * Clear all auth tokens.
    */
   clearTokens() {
     this.token = null;
     this.refreshToken = null;
+    this.tokenExpiresAt = null;
+    this._clearProactiveRefresh();
     remove('auth_token');
     remove('refresh_token');
+    remove('auth_token_expires_at');
   }
 
   /**

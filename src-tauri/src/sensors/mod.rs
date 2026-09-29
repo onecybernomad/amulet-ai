@@ -2,7 +2,7 @@ pub mod bridge;
 pub mod classifier;
 pub mod detector;
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 
 /// Global sensor state.

@@ -44,8 +44,9 @@ pub async fn trigger_sos(
     app: AppHandle,
     state: State<'_, SosState>,
     cache: State<'_, LocalCache>,
-    silent: bool,
+    silent: Option<bool>,
 ) -> Result<SosAlert, String> {
+    let silent = silent.unwrap_or(false);
     info!(silent, "SOS triggered");
 
     let user = cache

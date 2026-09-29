@@ -29,6 +29,8 @@ pub fn run() {
         // ── State ────────────────────────────────────────────────────────
         .manage(db::LocalCache::new().expect("Failed to initialize local cache"))
         .manage(sensors::SensorState::default())
+        .manage(commands::sensors::SensorDetectionState::default())
+        .manage(commands::driving::DrivingState::default())
         // ── Setup ───────────────────────────────────────────────────────
         .setup(|app| {
             let handle = app.handle().clone();
@@ -57,6 +59,9 @@ pub fn run() {
             commands::auth::register,
             commands::auth::verify_otp,
             commands::auth::logout,
+            commands::auth::setup_totp,
+            commands::auth::verify_totp_setup,
+            commands::auth::disable_totp,
             // Location
             commands::location::start_location_tracking,
             commands::location::stop_location_tracking,
@@ -93,6 +98,19 @@ pub fn run() {
             commands::geofence::add_place,
             commands::geofence::update_place,
             commands::geofence::delete_place,
+            // Sensors
+            commands::sensors::process_sensor_reading,
+            commands::sensors::acknowledge_fall_alert,
+            commands::sensors::cancel_fall_alert,
+            commands::sensors::get_fall_alert_status,
+            commands::sensors::set_detection_sensitivity,
+            commands::sensors::reset_detection,
+            // Driving
+            commands::driving::start_driving_session,
+            commands::driving::stop_driving_session,
+            commands::driving::report_driving_event,
+            commands::driving::get_driving_status,
+            commands::driving::get_driving_stats,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Amulet AI");

@@ -11,11 +11,20 @@ pub struct TileLocation {
     pub accuracy: f64,
 }
 
+/// Community find result — when another Tile user helps locate your item.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommunityFindResult {
+    pub tile_id: String,
+    pub latitude: f64,
+    pub longitude: f64,
+    pub found_at: String,
+    pub accuracy: f64,
+    pub reporter_id: String, // Anonymous ID of the user who found it
+}
+
 /// Ring a Tile tracker to make it beep.
 pub async fn ring_tile(tile_id: &str) -> Result<()> {
     tracing::info!("Ringing tile: {}", tile_id);
-
-    let client = reqwest::Client::new();
 
     // In production, this would call the Tile API
     // For now, we simulate a successful ring
@@ -62,4 +71,49 @@ pub async fn get_user_tiles(user_id: &str) -> Result<Vec<TileLocation>> {
 
     // In production, this would query the database
     Ok(vec![])
+}
+
+/// Submit a community find — when another user's device detects your Tile.
+pub async fn submit_community_find(
+    tile_id: &str,
+    latitude: f64,
+    longitude: f64,
+    reporter_id: &str,
+) -> Result<CommunityFindResult> {
+    tracing::info!(
+        "Community find for tile {} at ({}, {}) by reporter {}",
+        tile_id,
+        latitude,
+        longitude,
+        reporter_id
+    );
+
+    // Validate coordinates
+    if !(-90.0..=90.0).contains(&latitude) || !(-180.0..=180.0).contains(&longitude) {
+        anyhow::bail!("Invalid coordinates: lat={}, lng={}", latitude, longitude);
+    }
+
+    // In production: store in database and notify the tile owner
+    Ok(CommunityFindResult {
+        tile_id: tile_id.to_string(),
+        latitude,
+        longitude,
+        found_at: chrono::Utc::now().to_rfc3339(),
+        accuracy: 10.0,
+        reporter_id: reporter_id.to_string(),
+    })
+}
+
+/// Get community find history for a tile.
+pub async fn get_community_finds(tile_id: &str) -> Result<Vec<CommunityFindResult>> {
+    tracing::info!("Getting community finds for tile: {}", tile_id);
+
+    // In production: query the database
+    Ok(vec![])
+}
+
+/// Check if a Tile is eligible for community find network.
+pub fn is_community_find_eligible(tile_id: &str) -> bool {
+    // In production: check if the tile is registered and opted into community find
+    !tile_id.is_empty()
 }

@@ -43,6 +43,20 @@ export class DrivingPage {
 
     this.container.appendChild(header);
 
+    // Session controls
+    this.sessionControls = createElement('div', { class: 'session-controls' });
+    this.startSessionBtn = createElement('button', { class: 'btn btn-primary' }, 'Start Driving');
+    this.startSessionBtn.addEventListener('click', () => this._startDrivingSession());
+    this.stopSessionBtn = createElement('button', { class: 'btn btn-danger', style: { display: 'none' } }, 'Stop Driving');
+    this.stopSessionBtn.addEventListener('click', () => this._stopDrivingSession());
+    this.sessionControls.appendChild(this.startSessionBtn);
+    this.sessionControls.appendChild(this.stopSessionBtn);
+    this.container.appendChild(this.sessionControls);
+
+    // Stats
+    this.statsEl = createElement('div', { class: 'driving-stats' });
+    this.container.appendChild(this.statsEl);
+
     // Chart
     this.chartContainer = createElement('div', { class: 'chart-container', style: { marginBottom: '24px' } });
     this.container.appendChild(this.chartContainer);
@@ -72,9 +86,121 @@ export class DrivingPage {
       this.sessions = await api.get('/driving/sessions', { period: this.viewMode });
       this._renderReports();
       this._renderChart();
+      this._loadDrivingStats();
     } catch (err) {
       console.error('[DrivingPage] Failed to load sessions:', err);
     }
+  }
+
+  /**
+   * Load driving statistics.
+   * @private
+   */
+  async _loadDrivingStats() {
+    try {
+      const response = await api.get('/api/driving/stats');
+      this.drivingStats = response.data;
+      this._renderDrivingStats();
+    } catch (err) {
+      console.error('[DrivingPage] Failed to load driving stats:', err);
+    }
+  }
+
+  /**
+   * Render driving statistics summary.
+   * @private
+   */
+  _renderDrivingStats() {
+    if (!this.statsEl) return;
+    clearElement(this.statsEl);
+
+    if (!this.drivingStats) return;
+
+    const stats = this.drivingStats;
+    const grid = createElement('div', { class: 'driving-stats-grid' });
+
+    const items = [
+      { label: 'Total Trips', value: stats.total_sessions },
+      { label: 'Distance', value: `${stats.total_distance.toFixed(1)} km` },
+      { label: 'Max Speed', value: `${stats.max_speed.toFixed(0)} km/h` },
+      { label: 'Avg Speed', value: `${stats.avg_speed.toFixed(0)} km/h` },
+      { label: 'Hard Braking', value: stats.total_harsh_braking },
+      { label: 'Rapid Accel', value: stats.total_rapid_accel },
+      { label: 'Phone Use', value: stats.total_phone_use },
+    ];
+
+    for (const item of items) {
+      const statEl = createElement('div', { class: 'driving-stat-card' });
+      statEl.appendChild(createElement('div', { class: 'driving-stat-value' }, String(item.value)));
+      statEl.appendChild(createElement('div', { class: 'driving-stat-label' }, item.label));
+      grid.appendChild(statEl);
+    }
+
+    this.statsEl.appendChild(grid);
+  }
+
+  /**
+   * Start a driving session via Tauri.
+   * @private
+   */
+  async _startDrivingSession() {
+    if (window.__TAURI__) {
+      try {
+        const session = await window.__TAURI__.invoke('start_driving_session');
+        this._showNotification('Driving session started', 'success');
+        this.activeSession = session;
+      } catch (err) {
+        console.error('[DrivingPage] Failed to start session:', err);
+        this._showNotification('Failed to start driving session', 'danger');
+      }
+    } else {
+      this._showNotification('Driving mode requires the desktop app', 'warning');
+    }
+  }
+
+  /**
+   * Stop the current driving session.
+   * @private
+   */
+  async _stopDrivingSession() {
+    if (window.__TAURI__ && this.activeSession) {
+      try {
+        const summary = await window.__TAURI__.invoke('stop_driving_session');
+        this._showNotification(`Drive complete! Safety score: ${summary.safety_score}`, 'success');
+        this.activeSession = null;
+        this._loadSessions();
+      } catch (err) {
+        console.error('[DrivingPage] Failed to stop session:', err);
+      }
+    }
+  }
+
+  /**
+   * Show a toast notification.
+   * @param {string} message
+   * @param {string} type
+   * @private
+   */
+  _showNotification(message, type = 'info') {
+    const container = document.getElementById('notification-container') || this._createNotificationContainer();
+    const toast = createElement('div', { class: `toast toast-${type}` }, message);
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  }
+
+  /**
+   * Create notification container if it doesn't exist.
+   * @returns {HTMLElement}
+   * @private
+   */
+  _createNotificationContainer() {
+    const container = createElement('div', { id: 'notification-container', class: 'notification-container' });
+    document.body.appendChild(container);
+    return container;
   }
 
   /**

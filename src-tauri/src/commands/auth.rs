@@ -4,6 +4,7 @@ use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
+use base64::{engine::general_purpose::STANDARD, Engine};
 use serde::{Deserialize, Serialize};
 use tauri::State;
 use tracing::{debug, info, instrument, warn};
@@ -21,6 +22,24 @@ pub struct VerifyOtpRequest {
 pub struct SessionInfo {
     pub token: String,
     pub user: User,
+}
+
+#[derive(Debug, Serialize)]
+pub struct TotpSetupResponse {
+    pub secret: String,
+    pub qr_code_uri: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TotpVerifyRequest {
+    pub user_id: String,
+    pub otp: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TotpDisableRequest {
+    pub user_id: String,
+    pub otp: String,
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -43,6 +62,29 @@ fn verify_password(password: &str, hash: &str) -> Result<bool, String> {
 
 fn generate_session_token() -> String {
     Uuid::new_v4().to_string()
+}
+
+fn generate_totp_secret() -> String {
+    use rand::RngCore;
+    let mut bytes = [0u8; 20];
+    rand::thread_rng().fill_bytes(&mut bytes);
+    STANDARD.encode(&bytes)
+}
+
+fn verify_totp(secret: &str, code: &str) -> bool {
+    use totp_rs::{Algorithm, TOTP};
+    let totp = match TOTP::new(Algorithm::SHA1, 6, 1, 30, STANDARD.decode(secret).unwrap_or_default()) {
+        Ok(t) => t,
+        Err(_) => return false,
+    };
+    totp.check_current(code).unwrap_or(false)
+}
+
+fn generate_totp_uri(secret: &str, email: &str, issuer: &str) -> String {
+    format!(
+        "otpauth://totp/{}:{}?secret={}&issuer={}&algorithm=SHA1&digits=6&period=30",
+        issuer, email, secret, issuer
+    )
 }
 
 // ── Commands ──────────────────────────────────────────────────────────────
@@ -72,6 +114,8 @@ pub async fn register(
         phone: req.phone.clone(),
         avatar_url: None,
         password_hash: password_hash.clone(),
+        totp_secret: None,
+        totp_enabled: false,
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),
     };
@@ -135,10 +179,12 @@ pub async fn verify_otp(
         .map_err(|e| e.to_string())?
         .ok_or_else(|| "User not found".to_string())?;
 
-    // In production, verify TOTP against stored secret
-    // For scaffolding, accept any 6-digit code
-    if req.otp.len() != 6 || !req.otp.chars().all(|c| c.is_ascii_digit()) {
-        return Err("Invalid OTP format".into());
+    // Verify TOTP against stored secret
+    let secret = user.totp_secret.as_ref().ok_or_else(|| "2FA not enabled".to_string())?;
+    
+    if !verify_totp(secret, &req.otp) {
+        warn!(user_id = %req.user_id, "OTP verification failed");
+        return Err("Invalid OTP code".into());
     }
 
     let token = generate_session_token();
@@ -148,9 +194,92 @@ pub async fn verify_otp(
         token,
         user: User {
             password_hash: String::new(),
+            totp_secret: None,
+            totp_enabled: false,
             ..user
         },
     })
+}
+
+/// Setup TOTP for a user - generates secret and returns QR code URI.
+#[tauri::command]
+pub async fn setup_totp(
+    user_id: String,
+    cache: State<'_, LocalCache>,
+) -> Result<TotpSetupResponse, String> {
+    info!(user_id = %user_id, "Setting up TOTP");
+
+    let user = cache
+        .get_user_by_id(&user_id)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "User not found".to_string())?;
+
+    let secret = generate_totp_secret();
+    let qr_uri = generate_totp_uri(&secret, &user.email, "Amulet AI");
+
+    // Store the secret (not yet enabled until verified)
+    cache
+        .update_user_totp_secret(&user_id, &secret)
+        .map_err(|e| e.to_string())?;
+
+    Ok(TotpSetupResponse {
+        secret,
+        qr_code_uri: qr_uri,
+    })
+}
+
+/// Verify and enable TOTP for a user.
+#[tauri::command]
+pub async fn verify_totp_setup(
+    req: TotpVerifyRequest,
+    cache: State<'_, LocalCache>,
+) -> Result<(), String> {
+    info!(user_id = %req.user_id, "Verifying TOTP setup");
+
+    let user = cache
+        .get_user_by_id(&req.user_id)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "User not found".to_string())?;
+
+    let secret = user.totp_secret.as_ref().ok_or_else(|| "TOTP not set up".to_string())?;
+
+    if !verify_totp(secret, &req.otp) {
+        return Err("Invalid OTP code".into());
+    }
+
+    cache
+        .enable_user_totp(&req.user_id)
+        .map_err(|e| e.to_string())?;
+
+    info!(user_id = %req.user_id, "TOTP enabled successfully");
+    Ok(())
+}
+
+/// Disable TOTP for a user.
+#[tauri::command]
+pub async fn disable_totp(
+    req: TotpDisableRequest,
+    cache: State<'_, LocalCache>,
+) -> Result<(), String> {
+    info!(user_id = %req.user_id, "Disabling TOTP");
+
+    let user = cache
+        .get_user_by_id(&req.user_id)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "User not found".to_string())?;
+
+    let secret = user.totp_secret.as_ref().ok_or_else(|| "TOTP not enabled".to_string())?;
+
+    if !verify_totp(secret, &req.otp) {
+        return Err("Invalid OTP code".into());
+    }
+
+    cache
+        .disable_user_totp(&req.user_id)
+        .map_err(|e| e.to_string())?;
+
+    info!(user_id = %req.user_id, "TOTP disabled successfully");
+    Ok(())
 }
 
 /// Log out the current user and invalidate the session.

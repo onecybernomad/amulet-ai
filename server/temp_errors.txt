@@ -1,0 +1,1356 @@
+    Checking amulet-ai-server v0.1.0 (C:\Users\onecy\Documents\projects\amulet-ai\server)
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\mod.rs:1:17
+  |
+1 | use sqlx::any::{AnyPool, AnyPoolOptions};
+  |                 ^^^^^^^ no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\circles.rs:2:5
+  |
+2 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\chat.rs:2:5
+  |
+2 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\driving.rs:2:5
+  |
+2 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\geofence.rs:2:5
+  |
+2 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\incidents.rs:2:5
+  |
+2 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\locations.rs:3:5
+  |
+3 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\medications.rs:2:5
+  |
+2 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\subscriptions.rs:2:5
+  |
+2 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved import `sqlx::any::AnyPool`
+ --> src\db\users.rs:2:5
+  |
+2 | use sqlx::any::AnyPool;
+  |     ^^^^^^^^^^^-------
+  |                |
+  |                no `AnyPool` in `any`
+
+error[E0432]: unresolved imports `geo::Distance`, `geo::Haversine`
+ --> src\services\geofence_engine.rs:1:11
+  |
+1 | use geo::{Distance, Haversine, Point};
+  |           ^^^^^^^^  ^^^^^^^^^ no `Haversine` in the root
+  |           |
+  |           no `Distance` in the root
+
+error[E0433]: cannot find `AnyDatabaseKind` in `any`
+  --> src\db\mod.rs:37:53
+   |
+37 |         self.pool.any_database_type() == sqlx::any::AnyDatabaseKind::Sqlite
+   |                                                     ^^^^^^^^^^^^^^^ could not find `AnyDatabaseKind` in `any`
+
+error[E0433]: cannot find `AnyDatabaseKind` in `any`
+  --> src\db\mod.rs:42:53
+   |
+42 |         self.pool.any_database_type() == sqlx::any::AnyDatabaseKind::Postgres
+   |                                                     ^^^^^^^^^^^^^^^ could not find `AnyDatabaseKind` in `any`
+
+warning: unused imports: `chat`, `circles`, `driving`, `geofence`, `incidents`, `locations`, `medications`, `subscriptions`, and `users`
+ --> src\main.rs:9:10
+  |
+9 | use db::{circles, chat, driving, geofence, incidents, locations, medications, subscriptions, users};
+  |          ^^^^^^^  ^^^^  ^^^^^^^  ^^^^^^^^  ^^^^^^^^^  ^^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `http::StatusCode`
+  --> src\main.rs:14:5
+   |
+14 |     http::StatusCode,
+   |     ^^^^^^^^^^^^^^^^
+
+error[E0425]: cannot find function `hash_password` in this scope
+   --> src\main.rs:225:31
+    |
+225 |     let password_hash = match hash_password(password) {
+    |                               ^^^^^^^^^^^^^ not found in this scope
+
+error[E0061]: this function takes 4 arguments but 6 arguments were supplied
+   --> src\main.rs:236:11
+    |
+236 |     match db::users::create_user(
+    |           ^^^^^^^^^^^^^^^^^^^^^^
+237 |         &state.db.pool,
+238 |         &user_id,
+    |         -------- unexpected argument #2 of type `&Uuid`
+...
+242 |         &now,
+    |         ---- unexpected argument #6 of type `&DateTime<Utc>`
+    |
+note: function defined here
+   --> src\db\users.rs:7:14
+    |
+  7 | pub async fn create_user(pool: &AnyPool, email: &str, password_hash: &str, display_name: &str) -> Result<User> {
+    |              ^^^^^^^^^^^
+help: remove the extra arguments
+    |
+237 ~         &state.db.pool,
+238 |         email,
+239 |         display_name,
+240 ~         &password_hash,
+    |
+
+error[E0308]: mismatched types
+   --> src\main.rs:256:61
+    |
+256 |             Json(ApiResponse::success(AuthResponse { token, user }))
+    |                                                             ^^^^ expected `User`, found `Value`
+
+error[E0308]: mismatched types
+   --> src\main.rs:256:39
+    |
+256 |             Json(ApiResponse::success(AuthResponse { token, user }))
+    |                  -------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `()`, found `AuthResponse`
+    |                  |
+    |                  arguments to this function are incorrect
+    |
+note: associated function defined here
+   --> src\types.rs:209:12
+    |
+209 |     pub fn success(data: T) -> Self {
+    |            ^^^^^^^ -------
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:277:21
+    |
+272 | /     match db::users::get_user_by_email(&state.db.pool, email).await {
+273 | |         Ok(Some(user)) => {
+274 | |             let token = generate_jwt(&user.id.to_string(), &state.config.jwt_secret);
+275 | |             Json(ApiResponse::success(AuthResponse { token, user }))
+    | |             -------------------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<types::AuthResponse>>`
+276 | |         }
+277 | |         Ok(None) => Json(ApiResponse::<()>::error("Invalid credentials")),
+    | |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<AuthResponse>>`, found `Json<ApiResponse<()>>`
+...   |
+282 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<types::AuthResponse>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+268 - ) -> impl IntoResponse {
+268 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+275 ~             Box::new(Json(ApiResponse::success(AuthResponse { token, user })))
+276 |         }
+277 ~         Ok(None) => Box::new(Json(ApiResponse::<()>::error("Invalid credentials"))),
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:316:13
+    |
+312 | /     match db::circles::create_circle(&state.db.pool, &req.name, user_id).await {
+313 | |         Ok(circle) => Json(ApiResponse::success(circle)),
+    | |                       ---------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Circle>>`
+314 | |         Err(e) => {
+315 | |             tracing::error!("Create circle failed: {:?}", e);
+316 | |             Json(ApiResponse::<()>::error("Failed to create circle"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Circle>>`, found `Json<ApiResponse<()>>`
+317 | |         }
+318 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Circle>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+310 - ) -> impl IntoResponse {
+310 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+313 ~         Ok(circle) => Box::new(Json(ApiResponse::success(circle))),
+314 |         Err(e) => {
+315 |             tracing::error!("Create circle failed: {:?}", e);
+316 ~             Box::new(Json(ApiResponse::<()>::error("Failed to create circle")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:327:21
+    |
+325 | /     match db::circles::get_circle(&state.db.pool, id).await {
+326 | |         Ok(Some(circle)) => Json(ApiResponse::success(circle)),
+    | |                             ---------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Circle>>`
+327 | |         Ok(None) => Json(ApiResponse::<()>::error("Circle not found")),
+    | |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Circle>>`, found `Json<ApiResponse<()>>`
+328 | |         Err(e) => {
+...   |
+332 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Circle>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+324 - ) -> impl IntoResponse {
+324 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+326 ~         Ok(Some(circle)) => Box::new(Json(ApiResponse::success(circle))),
+327 ~         Ok(None) => Box::new(Json(ApiResponse::<()>::error("Circle not found"))),
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:345:13
+    |
+341 | /     match db::circles::join_circle(&state.db.pool, id, user_id).await {
+342 | |         Ok(_) => Json(ApiResponse::success("Joined circle")),
+    | |                  ------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+343 | |         Err(e) => {
+344 | |             tracing::error!("Join circle failed: {:?}", e);
+345 | |             Json(ApiResponse::<()>::error("Failed to join circle"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+346 | |         }
+347 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+339 - ) -> impl IntoResponse {
+339 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+342 ~         Ok(_) => Box::new(Json(ApiResponse::success("Joined circle"))),
+343 |         Err(e) => {
+344 |             tracing::error!("Join circle failed: {:?}", e);
+345 ~             Box::new(Json(ApiResponse::<()>::error("Failed to join circle")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:359:13
+    |
+355 | /     match db::circles::leave_circle(&state.db.pool, id, user_id).await {
+356 | |         Ok(_) => Json(ApiResponse::success("Left circle")),
+    | |                  ----------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+357 | |         Err(e) => {
+358 | |             tracing::error!("Leave circle failed: {:?}", e);
+359 | |             Json(ApiResponse::<()>::error("Failed to leave circle"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+360 | |         }
+361 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+353 - ) -> impl IntoResponse {
+353 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+356 ~         Ok(_) => Box::new(Json(ApiResponse::success("Left circle"))),
+357 |         Err(e) => {
+358 |             tracing::error!("Leave circle failed: {:?}", e);
+359 ~             Box::new(Json(ApiResponse::<()>::error("Failed to leave circle")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:372:13
+    |
+368 | /     match db::circles::get_circle_members(&state.db.pool, id).await {
+369 | |         Ok(members) => Json(ApiResponse::success(members)),
+    | |                        ----------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<User>>>`
+370 | |         Err(e) => {
+371 | |             tracing::error!("Get circle members failed: {:?}", e);
+372 | |             Json(ApiResponse::<()>::error("Failed to get circle members"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<User>>>`, found `Json<ApiResponse<()>>`
+373 | |         }
+374 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<User>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+367 - ) -> impl IntoResponse {
+367 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+369 ~         Ok(members) => Box::new(Json(ApiResponse::success(members))),
+370 |         Err(e) => {
+371 |             tracing::error!("Get circle members failed: {:?}", e);
+372 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get circle members")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:385:13
+    |
+381 | /     match db::circles::regenerate_invite_code(&state.db.pool, id).await {
+382 | |         Ok(code) => Json(ApiResponse::success(code)),
+    | |                     -------------------------------- this is found to be of type `axum::Json<types::ApiResponse<std::string::String>>`
+383 | |         Err(e) => {
+384 | |             tracing::error!("Regenerate invite code failed: {:?}", e);
+385 | |             Json(ApiResponse::<()>::error("Failed to regenerate invite code"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<String>>`, found `Json<ApiResponse<()>>`
+386 | |         }
+387 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<std::string::String>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+380 - ) -> impl IntoResponse {
+380 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+382 ~         Ok(code) => Box::new(Json(ApiResponse::success(code))),
+383 |         Err(e) => {
+384 |             tracing::error!("Regenerate invite code failed: {:?}", e);
+385 ~             Box::new(Json(ApiResponse::<()>::error("Failed to regenerate invite code")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:398:13
+    |
+394 | /     match db::locations::get_member_locations(&state.db.pool, id).await {
+395 | |         Ok(locations) => Json(ApiResponse::success(locations)),
+    | |                          ------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<MemberLocationResponse>>>`
+396 | |         Err(e) => {
+397 | |             tracing::error!("Get member locations failed: {:?}", e);
+398 | |             Json(ApiResponse::<()>::error("Failed to get member locations"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<...>>>`, found `Json<ApiResponse<()>>`
+399 | |         }
+400 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<MemberLocationResponse>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+393 - ) -> impl IntoResponse {
+393 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+395 ~         Ok(locations) => Box::new(Json(ApiResponse::success(locations))),
+396 |         Err(e) => {
+397 |             tracing::error!("Get member locations failed: {:?}", e);
+398 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get member locations")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:412:13
+    |
+408 | /     match db::locations::get_location_history(&state.db.pool, id, user_id, since).await {
+409 | |         Ok(history) => Json(ApiResponse::success(history)),
+    | |                        ----------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<MemberLocationResponse>>>`
+410 | |         Err(e) => {
+411 | |             tracing::error!("Get location history failed: {:?}", e);
+412 | |             Json(ApiResponse::<()>::error("Failed to get location history"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<...>>>`, found `Json<ApiResponse<()>>`
+413 | |         }
+414 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<MemberLocationResponse>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+406 - ) -> impl IntoResponse {
+406 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+409 ~         Ok(history) => Box::new(Json(ApiResponse::success(history))),
+410 |         Err(e) => {
+411 |             tracing::error!("Get location history failed: {:?}", e);
+412 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get location history")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:435:13
+    |
+422 | /     match db::geofence::create_place(
+423 | |         &state.db.pool,
+424 | |         id,
+425 | |         &req.name,
+...   |
+432 | |         Ok(place) => Json(ApiResponse::success(place)),
+    | |                      --------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Place>>`
+...   |
+435 | |             Json(ApiResponse::<()>::error("Failed to create place"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Place>>`, found `Json<ApiResponse<()>>`
+436 | |         }
+437 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Place>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+421 - ) -> impl IntoResponse {
+421 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+432 ~         Ok(place) => Box::new(Json(ApiResponse::success(place))),
+433 |         Err(e) => {
+434 |             tracing::error!("Create place failed: {:?}", e);
+435 ~             Box::new(Json(ApiResponse::<()>::error("Failed to create place")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:448:13
+    |
+444 | /     match db::geofence::get_places(&state.db.pool, id).await {
+445 | |         Ok(places) => Json(ApiResponse::success(places)),
+    | |                       ---------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<Place>>>`
+446 | |         Err(e) => {
+447 | |             tracing::error!("Get places failed: {:?}", e);
+448 | |             Json(ApiResponse::<()>::error("Failed to get places"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<Place>>>`, found `Json<ApiResponse<()>>`
+449 | |         }
+450 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<Place>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+443 - ) -> impl IntoResponse {
+443 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+445 ~         Ok(places) => Box::new(Json(ApiResponse::success(places))),
+446 |         Err(e) => {
+447 |             tracing::error!("Get places failed: {:?}", e);
+448 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get places")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:471:13
+    |
+458 | /     match db::geofence::update_place(
+459 | |         &state.db.pool,
+460 | |         id,
+461 | |         &req.name,
+...   |
+468 | |         Ok(place) => Json(ApiResponse::success(place)),
+    | |                      --------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Place>>`
+...   |
+471 | |             Json(ApiResponse::<()>::error("Failed to update place"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Place>>`, found `Json<ApiResponse<()>>`
+472 | |         }
+473 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Place>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+457 - ) -> impl IntoResponse {
+457 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+468 ~         Ok(place) => Box::new(Json(ApiResponse::success(place))),
+469 |         Err(e) => {
+470 |             tracing::error!("Update place failed: {:?}", e);
+471 ~             Box::new(Json(ApiResponse::<()>::error("Failed to update place")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:484:13
+    |
+480 | /     match db::geofence::delete_place(&state.db.pool, id).await {
+481 | |         Ok(_) => Json(ApiResponse::success("Place deleted")),
+    | |                  ------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+482 | |         Err(e) => {
+483 | |             tracing::error!("Delete place failed: {:?}", e);
+484 | |             Json(ApiResponse::<()>::error("Failed to delete place"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+485 | |         }
+486 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+479 - ) -> impl IntoResponse {
+479 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+481 ~         Ok(_) => Box::new(Json(ApiResponse::success("Place deleted"))),
+482 |         Err(e) => {
+483 |             tracing::error!("Delete place failed: {:?}", e);
+484 ~             Box::new(Json(ApiResponse::<()>::error("Failed to delete place")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:508:13
+    |
+495 | /     match db::incidents::create_incident(
+496 | |         &state.db.pool,
+497 | |         id,
+498 | |         Some(user_id),
+...   |
+505 | |         Ok(incident) => Json(ApiResponse::success(incident)),
+    | |                         ------------------------------------ this is found to be of type `axum::Json<types::ApiResponse<Incident>>`
+...   |
+508 | |             Json(ApiResponse::<()>::error("Failed to create incident"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Incident>>`, found `Json<ApiResponse<()>>`
+509 | |         }
+510 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Incident>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+493 - ) -> impl IntoResponse {
+493 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+505 ~         Ok(incident) => Box::new(Json(ApiResponse::success(incident))),
+506 |         Err(e) => {
+507 |             tracing::error!("Create incident failed: {:?}", e);
+508 ~             Box::new(Json(ApiResponse::<()>::error("Failed to create incident")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:521:13
+    |
+517 | /     match db::incidents::get_incidents(&state.db.pool, id, None).await {
+518 | |         Ok(incidents) => Json(ApiResponse::success(incidents)),
+    | |                          ------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<Incident>>>`
+519 | |         Err(e) => {
+520 | |             tracing::error!("Get incidents failed: {:?}", e);
+521 | |             Json(ApiResponse::<()>::error("Failed to get incidents"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<Incident>>>`, found `Json<ApiResponse<()>>`
+522 | |         }
+523 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<Incident>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+516 - ) -> impl IntoResponse {
+516 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+518 ~         Ok(incidents) => Box::new(Json(ApiResponse::success(incidents))),
+519 |         Err(e) => {
+520 |             tracing::error!("Get incidents failed: {:?}", e);
+521 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get incidents")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:536:13
+    |
+532 | /     match db::incidents::update_incident_status(&state.db.pool, id, status).await {
+533 | |         Ok(incident) => Json(ApiResponse::success(incident)),
+    | |                         ------------------------------------ this is found to be of type `axum::Json<types::ApiResponse<Incident>>`
+534 | |         Err(e) => {
+535 | |             tracing::error!("Update incident status failed: {:?}", e);
+536 | |             Json(ApiResponse::<()>::error("Failed to update incident status"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Incident>>`, found `Json<ApiResponse<()>>`
+537 | |         }
+538 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Incident>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+530 - ) -> impl IntoResponse {
+530 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+533 ~         Ok(incident) => Box::new(Json(ApiResponse::success(incident))),
+534 |         Err(e) => {
+535 |             tracing::error!("Update incident status failed: {:?}", e);
+536 ~             Box::new(Json(ApiResponse::<()>::error("Failed to update incident status")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:552:13
+    |
+548 | /     match db::incidents::log_incident_response(&state.db.pool, id, user_id, action).await {
+549 | |         Ok(_) => Json(ApiResponse::success("Response logged")),
+    | |                  --------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+550 | |         Err(e) => {
+551 | |             tracing::error!("Log incident response failed: {:?}", e);
+552 | |             Json(ApiResponse::<()>::error("Failed to log response"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+553 | |         }
+554 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+545 - ) -> impl IntoResponse {
+545 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+549 ~         Ok(_) => Box::new(Json(ApiResponse::success("Response logged"))),
+550 |         Err(e) => {
+551 |             tracing::error!("Log incident response failed: {:?}", e);
+552 ~             Box::new(Json(ApiResponse::<()>::error("Failed to log response")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:574:13
+    |
+562 | /     match db::medications::create_medication(
+563 | |         &state.db.pool,
+564 | |         user_id,
+565 | |         &req.name,
+...   |
+571 | |         Ok(medication) => Json(ApiResponse::success(medication)),
+    | |                           -------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Medication>>`
+...   |
+574 | |             Json(ApiResponse::<()>::error("Failed to create medication"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Medication>>`, found `Json<ApiResponse<()>>`
+575 | |         }
+576 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Medication>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+560 - ) -> impl IntoResponse {
+560 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+571 ~         Ok(medication) => Box::new(Json(ApiResponse::success(medication))),
+572 |         Err(e) => {
+573 |             tracing::error!("Create medication failed: {:?}", e);
+574 ~             Box::new(Json(ApiResponse::<()>::error("Failed to create medication")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:587:13
+    |
+583 | /     match db::medications::get_medications(&state.db.pool, user_id).await {
+584 | |         Ok(medications) => Json(ApiResponse::success(medications)),
+    | |                            --------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<Medication>>>`
+585 | |         Err(e) => {
+586 | |             tracing::error!("Get medications failed: {:?}", e);
+587 | |             Json(ApiResponse::<()>::error("Failed to get medications"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<Medication>>>`, found `Json<ApiResponse<()>>`
+588 | |         }
+589 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<Medication>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+581 - ) -> impl IntoResponse {
+581 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+584 ~         Ok(medications) => Box::new(Json(ApiResponse::success(medications))),
+585 |         Err(e) => {
+586 |             tracing::error!("Get medications failed: {:?}", e);
+587 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get medications")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:609:13
+    |
+597 | /     match db::medications::update_medication(
+598 | |         &state.db.pool,
+599 | |         id,
+600 | |         &req.name,
+...   |
+606 | |         Ok(medication) => Json(ApiResponse::success(medication)),
+    | |                           -------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Medication>>`
+...   |
+609 | |             Json(ApiResponse::<()>::error("Failed to update medication"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Medication>>`, found `Json<ApiResponse<()>>`
+610 | |         }
+611 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Medication>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+596 - ) -> impl IntoResponse {
+596 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+606 ~         Ok(medication) => Box::new(Json(ApiResponse::success(medication))),
+607 |         Err(e) => {
+608 |             tracing::error!("Update medication failed: {:?}", e);
+609 ~             Box::new(Json(ApiResponse::<()>::error("Failed to update medication")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:622:13
+    |
+618 | /     match db::medications::delete_medication(&state.db.pool, id).await {
+619 | |         Ok(_) => Json(ApiResponse::success("Medication deleted")),
+    | |                  ------------------------------------------------ this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+620 | |         Err(e) => {
+621 | |             tracing::error!("Delete medication failed: {:?}", e);
+622 | |             Json(ApiResponse::<()>::error("Failed to delete medication"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+623 | |         }
+624 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+617 - ) -> impl IntoResponse {
+617 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+619 ~         Ok(_) => Box::new(Json(ApiResponse::success("Medication deleted"))),
+620 |         Err(e) => {
+621 |             tracing::error!("Delete medication failed: {:?}", e);
+622 ~             Box::new(Json(ApiResponse::<()>::error("Failed to delete medication")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:639:13
+    |
+635 | /     match db::medications::log_adherence(&state.db.pool, id, user_id, taken, notes).await {
+636 | |         Ok(_) => Json(ApiResponse::success("Adherence logged")),
+    | |                  ---------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+637 | |         Err(e) => {
+638 | |             tracing::error!("Log adherence failed: {:?}", e);
+639 | |             Json(ApiResponse::<()>::error("Failed to log adherence"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+640 | |         }
+641 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+631 - ) -> impl IntoResponse {
+631 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+636 ~         Ok(_) => Box::new(Json(ApiResponse::success("Adherence logged"))),
+637 |         Err(e) => {
+638 |             tracing::error!("Log adherence failed: {:?}", e);
+639 ~             Box::new(Json(ApiResponse::<()>::error("Failed to log adherence")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:652:13
+    |
+648 | /     match db::medications::get_adherence(&state.db.pool, user_id, None).await {
+649 | |         Ok(records) => Json(ApiResponse::success(records)),
+    | |                        ----------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<(Uuid, Uuid, bool, std::option::Option<std::string::String>, DateTime<Utc>)>>>`
+650 | |         Err(e) => {
+651 | |             tracing::error!("Get adherence failed: {:?}", e);
+652 | |             Json(ApiResponse::<()>::error("Failed to get adherence"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<...>>>`, found `Json<ApiResponse<()>>`
+653 | |         }
+654 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<(Uuid, Uuid, bool, std::option::Option<std::string::String>, DateTime<Utc>)>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+646 - ) -> impl IntoResponse {
+646 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+649 ~         Ok(records) => Box::new(Json(ApiResponse::success(records))),
+650 |         Err(e) => {
+651 |             tracing::error!("Get adherence failed: {:?}", e);
+652 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get adherence")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:667:13
+    |
+663 | /     match db::chat::create_room(&state.db.pool, id, name).await {
+664 | |         Ok(room_id) => Json(ApiResponse::success(room_id)),
+    | |                        ----------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Uuid>>`
+665 | |         Err(e) => {
+666 | |             tracing::error!("Create room failed: {:?}", e);
+667 | |             Json(ApiResponse::<()>::error("Failed to create room"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Uuid>>`, found `Json<ApiResponse<()>>`
+668 | |         }
+669 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Uuid>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+661 - ) -> impl IntoResponse {
+661 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+664 ~         Ok(room_id) => Box::new(Json(ApiResponse::success(room_id))),
+665 |         Err(e) => {
+666 |             tracing::error!("Create room failed: {:?}", e);
+667 ~             Box::new(Json(ApiResponse::<()>::error("Failed to create room")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:680:13
+    |
+676 | /     match db::chat::get_rooms(&state.db.pool, id).await {
+677 | |         Ok(rooms) => Json(ApiResponse::success(rooms)),
+    | |                      --------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<(Uuid, std::string::String, DateTime<Utc>)>>>`
+678 | |         Err(e) => {
+679 | |             tracing::error!("Get rooms failed: {:?}", e);
+680 | |             Json(ApiResponse::<()>::error("Failed to get rooms"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<(Uuid, ..., ...)>>>`, found `Json<ApiResponse<()>>`
+681 | |         }
+682 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<(Uuid, std::string::String, DateTime<Utc>)>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+675 - ) -> impl IntoResponse {
+675 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+677 ~         Ok(rooms) => Box::new(Json(ApiResponse::success(rooms))),
+678 |         Err(e) => {
+679 |             tracing::error!("Get rooms failed: {:?}", e);
+680 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get rooms")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:693:13
+    |
+689 | /     match db::chat::get_messages(&state.db.pool, id, 50).await {
+690 | |         Ok(messages) => Json(ApiResponse::success(messages)),
+    | |                         ------------------------------------ this is found to be of type `axum::Json<types::ApiResponse<Vec<ChatMessage>>>`
+691 | |         Err(e) => {
+692 | |             tracing::error!("Get messages failed: {:?}", e);
+693 | |             Json(ApiResponse::<()>::error("Failed to get messages"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<ChatMessage>>>`, found `Json<ApiResponse<()>>`
+694 | |         }
+695 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<ChatMessage>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+688 - ) -> impl IntoResponse {
+688 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+690 ~         Ok(messages) => Box::new(Json(ApiResponse::success(messages))),
+691 |         Err(e) => {
+692 |             tracing::error!("Get messages failed: {:?}", e);
+693 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get messages")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:708:13
+    |
+704 | /     match db::chat::insert_message(&state.db.pool, id, user_id, &req.body).await {
+705 | |         Ok(message) => Json(ApiResponse::success(ChatMessageResponse { message })),
+    | |                        ----------------------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<types::ChatMessageResponse>>`
+706 | |         Err(e) => {
+707 | |             tracing::error!("Send message failed: {:?}", e);
+708 | |             Json(ApiResponse::<()>::error("Failed to send message"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<ChatMessageResponse>>`, found `Json<ApiResponse<()>>`
+709 | |         }
+710 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<types::ChatMessageResponse>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+702 - ) -> impl IntoResponse {
+702 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+705 ~         Ok(message) => Box::new(Json(ApiResponse::success(ChatMessageResponse { message }))),
+706 |         Err(e) => {
+707 |             tracing::error!("Send message failed: {:?}", e);
+708 ~             Box::new(Json(ApiResponse::<()>::error("Failed to send message")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:724:13
+    |
+720 | /     match db::chat::mark_read(&state.db.pool, id, user_id, last_read).await {
+721 | |         Ok(_) => Json(ApiResponse::success("Marked as read")),
+    | |                  -------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+722 | |         Err(e) => {
+723 | |             tracing::error!("Mark read failed: {:?}", e);
+724 | |             Json(ApiResponse::<()>::error("Failed to mark as read"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+725 | |         }
+726 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+717 - ) -> impl IntoResponse {
+717 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+721 ~         Ok(_) => Box::new(Json(ApiResponse::success("Marked as read"))),
+722 |         Err(e) => {
+723 |             tracing::error!("Mark read failed: {:?}", e);
+724 ~             Box::new(Json(ApiResponse::<()>::error("Failed to mark as read")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:737:13
+    |
+733 | /     match db::driving::create_session(&state.db.pool, user_id).await {
+734 | |         Ok(session) => Json(ApiResponse::success(session)),
+    | |                        ----------------------------------- this is found to be of type `axum::Json<types::ApiResponse<DrivingSession>>`
+735 | |         Err(e) => {
+736 | |             tracing::error!("Create driving session failed: {:?}", e);
+737 | |             Json(ApiResponse::<()>::error("Failed to create driving session"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<DrivingSession>>`, found `Json<ApiResponse<()>>`
+738 | |         }
+739 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<DrivingSession>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+731 - ) -> impl IntoResponse {
+731 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+734 ~         Ok(session) => Box::new(Json(ApiResponse::success(session))),
+735 |         Err(e) => {
+736 |             tracing::error!("Create driving session failed: {:?}", e);
+737 ~             Box::new(Json(ApiResponse::<()>::error("Failed to create driving session")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:750:13
+    |
+746 | /     match db::driving::update_session(&state.db.pool, id, Some(chrono::Utc::now())).await {
+747 | |         Ok(session) => Json(ApiResponse::success(session)),
+    | |                        ----------------------------------- this is found to be of type `axum::Json<types::ApiResponse<DrivingSession>>`
+748 | |         Err(e) => {
+749 | |             tracing::error!("Update driving session failed: {:?}", e);
+750 | |             Json(ApiResponse::<()>::error("Failed to update driving session"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<DrivingSession>>`, found `Json<ApiResponse<()>>`
+751 | |         }
+752 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<DrivingSession>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+745 - ) -> impl IntoResponse {
+745 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+747 ~         Ok(session) => Box::new(Json(ApiResponse::success(session))),
+748 |         Err(e) => {
+749 |             tracing::error!("Update driving session failed: {:?}", e);
+750 ~             Box::new(Json(ApiResponse::<()>::error("Failed to update driving session")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:768:13
+    |
+764 | /     match db::driving::insert_event(&state.db.pool, id, event_type, latitude, longitude, severity).await {
+765 | |         Ok(_) => Json(ApiResponse::success("Event recorded")),
+    | |                  -------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+766 | |         Err(e) => {
+767 | |             tracing::error!("Insert driving event failed: {:?}", e);
+768 | |             Json(ApiResponse::<()>::error("Failed to record event"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+769 | |         }
+770 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+759 - ) -> impl IntoResponse {
+759 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+765 ~         Ok(_) => Box::new(Json(ApiResponse::success("Event recorded"))),
+766 |         Err(e) => {
+767 |             tracing::error!("Insert driving event failed: {:?}", e);
+768 ~             Box::new(Json(ApiResponse::<()>::error("Failed to record event")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:781:13
+    |
+777 | /     match db::driving::get_reports(&state.db.pool, user_id).await {
+778 | |         Ok(reports) => Json(ApiResponse::success(reports)),
+    | |                        ----------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Vec<(Uuid, DateTime<Utc>, std::option::Option<DateTime<Utc>>)>>>`
+779 | |         Err(e) => {
+780 | |             tracing::error!("Get driving reports failed: {:?}", e);
+781 | |             Json(ApiResponse::<()>::error("Failed to get driving reports"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Vec<(Uuid, ..., ...)>>>`, found `Json<ApiResponse<()>>`
+782 | |         }
+783 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Vec<(Uuid, DateTime<Utc>, std::option::Option<DateTime<Utc>>)>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+775 - ) -> impl IntoResponse {
+775 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+778 ~         Ok(reports) => Box::new(Json(ApiResponse::success(reports))),
+779 |         Err(e) => {
+780 |             tracing::error!("Get driving reports failed: {:?}", e);
+781 ~             Box::new(Json(ApiResponse::<()>::error("Failed to get driving reports")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:804:13
+    |
+792 | /     match db::subscriptions::create_subscription(
+793 | |         &state.db.pool,
+794 | |         user_id,
+795 | |         &stripe_customer_id,
+...   |
+801 | |         Ok(subscription) => Json(ApiResponse::success(subscription)),
+    | |                             ---------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Subscription>>`
+...   |
+804 | |             Json(ApiResponse::<()>::error("Failed to create subscription"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Subscription>>`, found `Json<ApiResponse<()>>`
+805 | |         }
+806 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Subscription>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+789 - ) -> impl IntoResponse {
+789 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+801 ~         Ok(subscription) => Box::new(Json(ApiResponse::success(subscription))),
+802 |         Err(e) => {
+803 |             tracing::error!("Create subscription failed: {:?}", e);
+804 ~             Box::new(Json(ApiResponse::<()>::error("Failed to create subscription")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:815:21
+    |
+813 | /     match db::subscriptions::get_subscription(&state.db.pool, user_id).await {
+814 | |         Ok(Some(subscription)) => Json(ApiResponse::success(subscription)),
+    | |                                   ---------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Subscription>>`
+815 | |         Ok(None) => Json(ApiResponse::<()>::error("No subscription found")),
+    | |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Subscription>>`, found `Json<ApiResponse<()>>`
+816 | |         Err(e) => {
+...   |
+820 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Subscription>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+811 - ) -> impl IntoResponse {
+811 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+814 ~         Ok(Some(subscription)) => Box::new(Json(ApiResponse::success(subscription))),
+815 ~         Ok(None) => Box::new(Json(ApiResponse::<()>::error("No subscription found"))),
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:833:13
+    |
+829 | /     match db::subscriptions::update_tier(&state.db.pool, id, tier).await {
+830 | |         Ok(subscription) => Json(ApiResponse::success(subscription)),
+    | |                             ---------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Subscription>>`
+831 | |         Err(e) => {
+832 | |             tracing::error!("Update subscription tier failed: {:?}", e);
+833 | |             Json(ApiResponse::<()>::error("Failed to update subscription tier"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Subscription>>`, found `Json<ApiResponse<()>>`
+834 | |         }
+835 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Subscription>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+827 - ) -> impl IntoResponse {
+827 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+830 ~         Ok(subscription) => Box::new(Json(ApiResponse::success(subscription))),
+831 |         Err(e) => {
+832 |             tracing::error!("Update subscription tier failed: {:?}", e);
+833 ~             Box::new(Json(ApiResponse::<()>::error("Failed to update subscription tier")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:846:13
+    |
+842 | /     match db::subscriptions::cancel_subscription(&state.db.pool, id).await {
+843 | |         Ok(subscription) => Json(ApiResponse::success(subscription)),
+    | |                             ---------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<Subscription>>`
+844 | |         Err(e) => {
+845 | |             tracing::error!("Cancel subscription failed: {:?}", e);
+846 | |             Json(ApiResponse::<()>::error("Failed to cancel subscription"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Subscription>>`, found `Json<ApiResponse<()>>`
+847 | |         }
+848 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<Subscription>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+841 - ) -> impl IntoResponse {
+841 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+843 ~         Ok(subscription) => Box::new(Json(ApiResponse::success(subscription))),
+844 |         Err(e) => {
+845 |             tracing::error!("Cancel subscription failed: {:?}", e);
+846 ~             Box::new(Json(ApiResponse::<()>::error("Failed to cancel subscription")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:866:13
+    |
+862 | /     match services::tile::ring_tile(&id).await {
+863 | |         Ok(_) => Json(ApiResponse::success("Ring command sent")),
+    | |                  ----------------------------------------------- this is found to be of type `axum::Json<types::ApiResponse<&str>>`
+864 | |         Err(e) => {
+865 | |             tracing::error!("Ring tile failed: {:?}", e);
+866 | |             Json(ApiResponse::<()>::error("Failed to ring tile"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<&str>>`, found `Json<ApiResponse<()>>`
+867 | |         }
+868 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<&str>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+861 - ) -> impl IntoResponse {
+861 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+863 ~         Ok(_) => Box::new(Json(ApiResponse::success("Ring command sent"))),
+864 |         Err(e) => {
+865 |             tracing::error!("Ring tile failed: {:?}", e);
+866 ~             Box::new(Json(ApiResponse::<()>::error("Failed to ring tile")))
+    |
+
+error[E0308]: `match` arms have incompatible types
+   --> src\main.rs:879:13
+    |
+875 | /     match services::tile::locate_tile(&id).await {
+876 | |         Ok(location) => Json(ApiResponse::success(location)),
+    | |                         ------------------------------------ this is found to be of type `axum::Json<types::ApiResponse<std::option::Option<TileLocation>>>`
+877 | |         Err(e) => {
+878 | |             tracing::error!("Locate tile failed: {:?}", e);
+879 | |             Json(ApiResponse::<()>::error("Failed to locate tile"))
+    | |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Json<ApiResponse<Option<TileLocation>>>`, found `Json<ApiResponse<()>>`
+880 | |         }
+881 | |     }
+    | |_____- `match` arms have incompatible types
+    |
+    = note: expected struct `axum::Json<types::ApiResponse<std::option::Option<TileLocation>>>`
+               found struct `axum::Json<types::ApiResponse<()>>`
+help: you could change the return type to be a boxed trait object
+    |
+874 - ) -> impl IntoResponse {
+874 + ) -> Box<dyn IntoResponse> {
+    |
+help: if you change the return type to expect trait objects, box the returned expressions
+    |
+876 ~         Ok(location) => Box::new(Json(ApiResponse::success(location))),
+877 |         Err(e) => {
+878 |             tracing::error!("Locate tile failed: {:?}", e);
+879 ~             Box::new(Json(ApiResponse::<()>::error("Failed to locate tile")))
+    |
+
+error[E0277]: the trait bound `FromFn<..., ..., ..., _>: Service<...>` is not satisfied
+   --> src\main.rs:160:16
+    |
+160 |           .layer(axum::middleware::from_fn_with_state(
+    |  __________-----_^
+    | |          |
+    | |          required by a bound introduced by this call
+161 | |             rate_limiter.clone(),
+162 | |             rate_limit_middleware,
+163 | |         ))
+    | |_________^ unsatisfied trait bound
+    |
+    = help: the trait `tower::Service<axum::http::Request<axum::body::Body>>` is not implemented for `FromFn<fn(..., ..., ...) -> ... {rate_limit_middleware}, ..., ..., _>`
+    = help: the following other types implement trait `tower::Service<Request>`:
+              axum::middleware::FromFn<F, S, I, (T1, T2)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5, T6)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5, T6, T7)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5, T6, T7, T8)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5, T6, T7, T8, T9)>
+            and 8 others
+note: required by a bound in `Router::<S>::layer`
+   --> C:\Users\onecy\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\axum-0.7.9\src\routing\mod.rs:284:21
+    |
+281 |     pub fn layer<L>(self, layer: L) -> Router<S>
+    |            ----- required by a bound in this associated function
+...
+284 |         L::Service: Service<Request> + Clone + Send + 'static,
+    |                     ^^^^^^^^^^^^^^^^ required by this bound in `Router::<S>::layer`
+    = note: the full name for the type has been written to 'C:\Users\onecy\Documents\projects\amulet-ai\server\target\debug\deps\amulet_ai_server-1607e0647f0464c1.long-type-4737746061918069049.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+error[E0277]: the trait bound `FromFn<..., ..., ..., _>: Service<...>` is not satisfied
+   --> src\main.rs:95:15
+    |
+ 95 |       let app = Router::new()
+    |  _______________^
+ 96 | |         // Health check
+ 97 | |         .route("/health", get(health_check))
+...   |
+162 | |             rate_limit_middleware,
+163 | |         ))
+    | |__________^ unsatisfied trait bound
+    |
+    = help: the trait `tower::Service<axum::http::Request<axum::body::Body>>` is not implemented for `FromFn<fn(..., ..., ...) -> ... {rate_limit_middleware}, ..., ..., _>`
+    = help: the following other types implement trait `tower::Service<Request>`:
+              axum::middleware::FromFn<F, S, I, (T1, T2)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5, T6)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5, T6, T7)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5, T6, T7, T8)>
+              axum::middleware::FromFn<F, S, I, (T1, T2, T3, T4, T5, T6, T7, T8, T9)>
+            and 8 others
+    = note: the full name for the type has been written to 'C:\Users\onecy\Documents\projects\amulet-ai\server\target\debug\deps\amulet_ai_server-1607e0647f0464c1.long-type-4737746061918069049.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+warning: unused variable: `client`
+  --> src\services\dispatch.rs:23:9
+   |
+23 |     let client = reqwest::Client::new();
+   |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_client`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `client`
+  --> src\services\tile.rs:18:9
+   |
+18 |     let client = reqwest::Client::new();
+   |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_client`
+
+Some errors have detailed explanations: E0061, E0277, E0308, E0425, E0432, E0433.
+For more information about an error, try `rustc --explain E0061`.
+warning: `amulet-ai-server` (bin "amulet-ai-server") generated 4 warnings
+error: could not compile `amulet-ai-server` (bin "amulet-ai-server") due to 57 previous errors; 4 warnings emitted

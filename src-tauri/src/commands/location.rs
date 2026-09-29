@@ -45,15 +45,23 @@ pub async fn start_location_tracking(
     app: AppHandle,
     state: State<'_, LocationTrackingState>,
     cache: State<'_, LocalCache>,
+    mode: Option<String>,
 ) -> Result<(), String> {
     if state.active.swap(true, Ordering::SeqCst) {
         return Err("Location tracking is already active".into());
     }
 
-    info!("Starting location tracking");
+    let tracking_mode = mode.unwrap_or_else(|| "balanced".into());
+    info!(mode = %tracking_mode, "Starting location tracking");
     let active = state.active.clone();
     let app_handle = app.clone();
     let cache = cache.inner().clone();
+
+    let interval_secs = match tracking_mode.as_str() {
+        "active" => 5,
+        "passive" => 30,
+        _ => 10, // balanced
+    };
 
     tokio::spawn(async move {
         while active.load(Ordering::SeqCst) {
@@ -79,7 +87,7 @@ pub async fn start_location_tracking(
             }
 
             debug!(lat = %ping.lat, lng = %ping.lng, "Location ping emitted");
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(interval_secs)).await;
         }
         debug!("Location tracking loop terminated");
     });

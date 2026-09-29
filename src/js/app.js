@@ -7,8 +7,6 @@ import { store } from './state.js';
 import { api } from './api.js';
 import { ws } from './ws.js';
 import { router } from './router.js';
-import { initTheme } from './styles/theme.js';
-import { ready } from './lib/dom.js';
 import { get } from './lib/storage.js';
 
 /**
@@ -28,19 +26,27 @@ async function init() {
 
     // Connect WebSocket
     ws.connect();
-
-    // Register WebSocket handlers
-    setupWSHandlers();
   }
 
   // Set up navigation guard
   router.beforeEach((to) => {
-    // Allow access to settings without auth for login purposes
-    if (to === '/settings') return true;
+    // Allow public routes without auth
+    if (to === '/login' || to === '/signup' || to === '/onboarding') return true;
 
     // Redirect to login if not authenticated
-    if (!api.getToken() && to !== '/map') {
+    if (!api.getToken()) {
+      return '/login';
+    }
+
+    // Redirect authenticated users away from auth pages
+    if ((to === '/login' || to === '/signup') && api.getToken()) {
       return '/map';
+    }
+
+    // Redirect to onboarding if not completed
+    const onboardingCompleted = localStorage.getItem('amulet:onboarding_completed');
+    if (!onboardingCompleted && to !== '/onboarding') {
+      return '/onboarding';
     }
 
     return true;
@@ -52,43 +58,72 @@ async function init() {
   // Set up global event listeners
   setupGlobalListeners();
 
-  // Set up Tauri integration
-  setupTauri();
+  // Set up WebSocket message handlers
+  setupWebSocketHandlers();
 
-  // Hide loading screen
-  const loadingScreen = document.getElementById('loading-screen');
-  if (loadingScreen) {
-    loadingScreen.style.display = 'none';
-  }
+  // Start medication reminders
+  setupMedicationReminders();
 
   console.log('[App] Amulet AI initialized');
 }
 
 /**
- * Set up WebSocket message handlers.
+ * Set up WebSocket message handlers for realtime features.
  */
-function setupWSHandlers() {
-  ws.on('member_location', (data) => {
-    const members = store.get('members') || [];
-    const idx = members.findIndex(m => m.id === data.userId);
-    if (idx !== -1) {
-      members[idx] = { ...members[idx], lat: data.lat, lng: data.lng, lastSeen: Date.now(), online: true };
-      store.set('members', members);
-    }
-  });
-
-  ws.on('incident', (data) => {
-    store.set('activeIncident', data);
-    store.set('incidents', [...(store.get('incidents') || []), data]);
-  });
-
+function setupWebSocketHandlers() {
+  // Chat messages
   ws.on('chat_message', (data) => {
-    window.dispatchEvent(new CustomEvent('chat:message', { detail: data }));
+    window.dispatchEvent(new CustomEvent('ws:chat_message', { detail: data }));
   });
 
-  ws.on('typing', (data) => {
-    window.dispatchEvent(new CustomEvent('chat:typing', { detail: data }));
+  // Fall detection alerts
+  ws.on('fall_detected', (data) => {
+    window.dispatchEvent(new CustomEvent('ws:fall_detected', { detail: data }));
   });
+
+  // Crash detection alerts
+  ws.on('crash_detected', (data) => {
+    window.dispatchEvent(new CustomEvent('ws:crash_detected', { detail: data }));
+  });
+
+  // Geofence events
+  ws.on('geofence_event', (data) => {
+    window.dispatchEvent(new CustomEvent('ws:geofence_event', { detail: data }));
+  });
+
+  // SOS alerts
+  ws.on('alert', (data) => {
+    window.dispatchEvent(new CustomEvent('ws:alert', { detail: data }));
+  });
+}
+
+/**
+ * Set up medication reminder service.
+ */
+function setupMedicationReminders() {
+  // Start the reminder service
+  if ('Notification' in window) {
+    import('./services/med-reminders.js').then(({ medReminder }) => {
+      medReminder.start();
+
+      // Update medications when store changes
+      store.on('medications', (meds) => {
+        medReminder.updateMedications(meds);
+      });
+    });
+  }
+}
+
+/**
+ * Initialize theme from localStorage or system preference.
+ */
+function initTheme() {
+  const savedTheme = get('theme', null);
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
 }
 
 /**
@@ -99,8 +134,7 @@ function setupGlobalListeners() {
   window.addEventListener('auth:expired', () => {
     api.clearTokens();
     store.set('user', null);
-    store.set('circle', null);
-    window.location.hash = '#/map';
+    router.navigate('/login');
   });
 
   // Handle online/offline
@@ -120,32 +154,11 @@ function setupGlobalListeners() {
       ws.connect();
     }
   });
-
-  // Global error handler
-  window.addEventListener('error', (event) => {
-    console.error('[App] Unhandled error:', event.error);
-  });
-
-  window.addEventListener('unhandledrejection', (event) => {
-    console.error('[App] Unhandled promise rejection:', event.reason);
-  });
-}
-
-/**
- * Set up Tauri native integration.
- */
-function setupTauri() {
-  if (window.__TAURI__) {
-    console.log('[App] Tauri environment detected');
-
-    // Expose Tauri invoke for SOS and other native features
-    window.__TAURI__.invoke('get_app_info').then(info => {
-      console.log('[App] App info:', info);
-    }).catch(err => {
-      console.warn('[App] Failed to get app info:', err);
-    });
-  }
 }
 
 // Start the app when DOM is ready
-ready(init);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

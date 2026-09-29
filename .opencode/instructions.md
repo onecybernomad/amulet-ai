@@ -1,0 +1,3 @@
+- Rely exclusively on native OpenCode tools. 
+- NEVER attempt to call 'context_info'.
+- Do not hallucinate file paths that have not been explicitly read or verified.

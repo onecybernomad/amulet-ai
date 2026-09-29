@@ -26,11 +26,12 @@ pub enum CrashState {
 ///   FallCandidate → FallDetected (when impact follows within 500ms)
 ///   FallCandidate → Idel (timeout without impact)
 ///   FallDetected → Escalated (after 30s without user response)
+#[derive(Debug)]
 pub struct FallDetector {
     state: FallState,
     candidate_since: Option<Instant>,
     detected_since: Option<Instant>,
-    window: SensorWindow,
+    pub window: SensorWindow,
 }
 
 impl FallDetector {
@@ -79,7 +80,7 @@ impl FallDetector {
         }
 
         // Merge window data
-        for i in 0..window.len() {
+        for _i in 0..window.len() {
             // In production: feed individual readings into self.window
         }
 
@@ -111,10 +112,11 @@ impl Default for FallDetector {
 ///   Idle → CrashCandidate (when high jerk detected)
 ///   CrashCandidate → CrashDetected (when angular velocity confirms within 200ms)
 ///   CrashCandidate → Idel (timeout without confirmation)
+#[derive(Debug)]
 pub struct CrashDetector {
     state: CrashState,
     candidate_since: Option<Instant>,
-    window: SensorWindow,
+    pub window: SensorWindow,
 }
 
 impl CrashDetector {

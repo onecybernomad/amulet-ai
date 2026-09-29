@@ -3,6 +3,7 @@ use std::sync::Arc;
 use axum::extract::ws::WebSocket;
 use tokio::sync::{broadcast, Mutex};
 use uuid::Uuid;
+use sqlx::SqlitePool;
 use crate::types::{ChatMessage, Incident, LocationPing};
 
 pub mod alerts;
@@ -18,6 +19,14 @@ pub enum HubMessage {
     LocationPing(LocationPing),
     ChatMessage(ChatMessage),
     Alert(Incident),
+    GeofenceEvent {
+        place_name: String,
+        user_id: Uuid,
+        circle_id: Uuid,
+        entered: bool,
+        latitude: f64,
+        longitude: f64,
+    },
     Presence {
         user_id: Uuid,
         circle_id: Uuid,
@@ -30,14 +39,16 @@ pub enum HubMessage {
 pub struct RealtimeHub {
     pub members: CircleMembers,
     pub tx: broadcast::Sender<HubMessage>,
+    pub db_pool: SqlitePool,
 }
 
 impl RealtimeHub {
-    pub fn new() -> Self {
+    pub fn new(db_pool: SqlitePool) -> Self {
         let (tx, _rx) = broadcast::channel(1024);
         Self {
             members: Arc::new(Mutex::new(HashMap::new())),
             tx,
+            db_pool,
         }
     }
 
@@ -69,11 +80,7 @@ impl RealtimeHub {
     }
 }
 
-impl Default for RealtimeHub {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+
 
 /// Client-to-server message types.
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -83,7 +90,9 @@ pub enum ClientMessage {
     Leave { circle_id: Uuid },
     LocationPing { latitude: f64, longitude: f64 },
     ChatMessage { room_id: Uuid, body: String },
-    Sos { latitude: f64, longitude: f64 },
+    Sos { latitude: f64, longitude: f64, silent: Option<bool> },
+    FallDetected { latitude: f64, longitude: f64 },
+    CrashDetected { latitude: f64, longitude: f64, severity: String },
 }
 
 /// Handle a WebSocket connection from a client.
@@ -138,8 +147,14 @@ pub async fn handle_connection(mut socket: WebSocket, hub: RealtimeHub, user_id:
             ClientMessage::ChatMessage { room_id, body } => {
                 chat::handle_chat_message(&hub, user_id, room_id, body).await;
             }
-            ClientMessage::Sos { latitude, longitude } => {
-                alerts::handle_sos(&hub, user_id, latitude, longitude).await;
+            ClientMessage::Sos { latitude, longitude, silent } => {
+                alerts::handle_sos(&hub, user_id, latitude, longitude, silent.unwrap_or(false)).await;
+            }
+            ClientMessage::FallDetected { latitude, longitude } => {
+                alerts::handle_fall(&hub, user_id, latitude, longitude).await;
+            }
+            ClientMessage::CrashDetected { latitude, longitude, severity } => {
+                alerts::handle_crash(&hub, user_id, latitude, longitude, &severity).await;
             }
         }
     }

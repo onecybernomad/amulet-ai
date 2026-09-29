@@ -6,6 +6,9 @@ pub struct Config {
     pub database_url: String,
     pub redis_url: String,
     pub jwt_secret: String,
+    pub access_token_ttl_minutes: i64,
+    pub refresh_token_ttl_days: i64,
+    pub otp_issuer: String,
     pub server_host: String,
     pub server_port: u16,
     pub stripe_secret_key: String,
@@ -22,11 +25,21 @@ impl Config {
 
         Ok(Self {
             database_url: env::var("DATABASE_URL")
-                .unwrap_or_else(|_| "postgres://postgres:postgres@localhost:5432/amulet_ai".into()),
+                .unwrap_or_else(|_| "sqlite:./amulet_ai.db?mode=rwc".into()),
             redis_url: env::var("REDIS_URL")
                 .unwrap_or_else(|_| "redis://localhost:6379".into()),
             jwt_secret: env::var("JWT_SECRET")
                 .unwrap_or_else(|_| "dev-secret-key-do-not-use-in-production".into()),
+            access_token_ttl_minutes: env::var("ACCESS_TOKEN_TTL_MINUTES")
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(15),
+            refresh_token_ttl_days: env::var("REFRESH_TOKEN_TTL_DAYS")
+                .ok()
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(30),
+            otp_issuer: env::var("OTP_ISSUER")
+                .unwrap_or_else(|_| "Amulet AI".into()),
             server_host: env::var("SERVER_HOST")
                 .unwrap_or_else(|_| "127.0.0.1".into()),
             server_port: env::var("SERVER_PORT")

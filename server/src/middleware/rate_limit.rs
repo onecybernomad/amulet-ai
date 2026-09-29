@@ -1,5 +1,5 @@
 use axum::{
-    extract::Request,
+    extract::{Request, State},
     http::StatusCode,
     middleware::Next,
     response::Response,
@@ -46,7 +46,7 @@ impl RateLimiter {
 
 /// Rate limiting middleware.
 pub async fn rate_limit_middleware(
-    limiter: RateLimiter,
+    State(limiter): State<RateLimiter>,
     req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {

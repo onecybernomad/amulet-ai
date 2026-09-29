@@ -32,6 +32,8 @@ pub struct User {
     pub phone: Option<String>,
     pub avatar_url: Option<String>,
     pub password_hash: String,
+    pub totp_secret: Option<String>,
+    pub totp_enabled: bool,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }

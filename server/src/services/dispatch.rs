@@ -1,5 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use crate::types::Incident;
 
 /// Response from a dispatch provider.
@@ -11,6 +12,36 @@ pub struct DispatchResponse {
     pub estimated_arrival: Option<String>,
 }
 
+/// Dispatch status information.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DispatchStatus {
+    pub dispatch_id: String,
+    pub incident_id: String,
+    pub status: String, // "pending" | "dispatched" | "en_route" | "arrived" | "cancelled"
+    pub provider: String,
+    pub estimated_arrival: Option<String>,
+    pub dispatched_at: String,
+    pub updated_at: String,
+}
+
+/// Check if a subscription tier has emergency dispatch access.
+/// Gold and Platinum tiers have dispatch; Free and Silver do not.
+pub fn tier_has_dispatch(tier: &str) -> bool {
+    matches!(tier, "gold" | "platinum")
+}
+
+/// Check if a subscription tier has roadside assistance.
+/// Gold and Platinum tiers have roadside assistance.
+pub fn tier_has_roadside(tier: &str) -> bool {
+    matches!(tier, "gold" | "platinum")
+}
+
+/// Check if a subscription tier has medical advice.
+/// Only Platinum tier has medical advice.
+pub fn tier_has_medical(tier: &str) -> bool {
+    matches!(tier, "platinum")
+}
+
 /// Trigger emergency dispatch for an incident.
 /// Integrates with Urgent.ly or RapidSOS depending on configuration.
 pub async fn trigger_dispatch(incident: &Incident) -> Result<DispatchResponse> {
@@ -19,8 +50,6 @@ pub async fn trigger_dispatch(incident: &Incident) -> Result<DispatchResponse> {
         incident.id,
         incident.incident_type
     );
-
-    let client = reqwest::Client::new();
 
     // Build the dispatch payload
     let payload = serde_json::json!({
@@ -72,4 +101,36 @@ pub async fn trigger_dispatch_with_provider(
     };
 
     Ok(response)
+}
+
+/// Get the status of a dispatch.
+pub async fn get_dispatch_status(dispatch_id: &str) -> Result<DispatchStatus> {
+    tracing::info!("Getting dispatch status for: {}", dispatch_id);
+
+    // In production: query the dispatch provider API
+    Ok(DispatchStatus {
+        dispatch_id: dispatch_id.to_string(),
+        incident_id: Uuid::new_v4().to_string(),
+        status: "en_route".to_string(),
+        provider: "urgent.ly".to_string(),
+        estimated_arrival: Some("5-8 minutes".to_string()),
+        dispatched_at: chrono::Utc::now().to_rfc3339(),
+        updated_at: chrono::Utc::now().to_rfc3339(),
+    })
+}
+
+/// Cancel a dispatch.
+pub async fn cancel_dispatch(dispatch_id: &str) -> Result<DispatchStatus> {
+    tracing::info!("Cancelling dispatch: {}", dispatch_id);
+
+    // In production: call the dispatch provider API to cancel
+    Ok(DispatchStatus {
+        dispatch_id: dispatch_id.to_string(),
+        incident_id: Uuid::new_v4().to_string(),
+        status: "cancelled".to_string(),
+        provider: "urgent.ly".to_string(),
+        estimated_arrival: None,
+        dispatched_at: chrono::Utc::now().to_rfc3339(),
+        updated_at: chrono::Utc::now().to_rfc3339(),
+    })
 }

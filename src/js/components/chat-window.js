@@ -145,8 +145,51 @@ export class ChatWindow {
     this.input.style.height = 'auto';
     this.sendBtn.disabled = true;
 
-    // Emit for WebSocket send
-    window.dispatchEvent(new CustomEvent('chat:send', { detail: message }));
+    // Send via WebSocket if connected
+    if (window.__WS__ && window.__WS__.readyState === WebSocket.OPEN) {
+      window.__WS__.send('chat_message', {
+        room_id: this.roomId,
+        body: text,
+      });
+    } else {
+      // Fallback: send via API
+      api.post(`/api/rooms/${this.roomId}/messages`, { body: text }).catch(console.error);
+    }
+  }
+
+  /**
+   * Handle incoming realtime message from WebSocket.
+   * @param {Object} data
+   */
+  handleRealtimeMessage(data) {
+    if (data.room_id !== this.roomId) return;
+
+    const message = {
+      id: data.id || crypto.randomUUID(),
+      senderId: data.sender_id,
+      senderName: data.sender_name || 'Member',
+      text: data.body,
+      timestamp: data.created_at || Date.now(),
+      readBy: data.read_by || [],
+    };
+
+    this.addMessage(message);
+  }
+
+  /**
+   * Update read receipts for messages.
+   * @param {string} userId
+   * @param {string} messageId
+   */
+  updateReadReceipt(userId, messageId) {
+    // Update UI to show read receipt
+    const messages = this.messages.filter(m => m.id === messageId);
+    for (const msg of messages) {
+      if (!msg.readBy) msg.readBy = [];
+      if (!msg.readBy.includes(userId)) {
+        msg.readBy.push(userId);
+      }
+    }
   }
 
   /**

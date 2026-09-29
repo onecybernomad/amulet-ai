@@ -53,7 +53,7 @@ impl LocalCache {
 
     /// Run all pending migrations.
     fn run_migrations(&self) -> Result<()> {
-        let mut conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock().unwrap();
         conn.execute_batch(&MIGRATIONS.join("\n"))?;
         debug!("Migrations applied successfully");
         Ok(())
@@ -85,7 +85,7 @@ impl LocalCache {
     pub fn get_user_by_id(&self, id: &str) -> Result<Option<User>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, email, name, phone, avatar_url, password_hash, created_at, updated_at
+            "SELECT id, email, name, phone, avatar_url, password_hash, totp_secret, totp_enabled, created_at, updated_at
              FROM users WHERE id = ?1",
         )?;
         let user = stmt
@@ -97,7 +97,7 @@ impl LocalCache {
     pub fn get_user_by_email(&self, email: &str) -> Result<Option<User>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, email, name, phone, avatar_url, password_hash, created_at, updated_at
+            "SELECT id, email, name, phone, avatar_url, password_hash, totp_secret, totp_enabled, created_at, updated_at
              FROM users WHERE email = ?1",
         )?;
         let user = stmt
@@ -110,7 +110,7 @@ impl LocalCache {
         // In production, look up the user associated with the current session token
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, email, name, phone, avatar_url, password_hash, created_at, updated_at
+            "SELECT id, email, name, phone, avatar_url, password_hash, totp_secret, totp_enabled, created_at, updated_at
              FROM users ORDER BY created_at LIMIT 1",
         )?;
         let user = stmt
@@ -127,13 +127,47 @@ impl LocalCache {
             phone: row.get(3)?,
             avatar_url: row.get(4)?,
             password_hash: row.get(5)?,
-            created_at: chrono::DateTime::parse_from_rfc3339(&row.get::<_, String>(6)?)
-                .map_err(|e| rusqlite::Error::FromSqlConversionFailure(6, rusqlite::types::Type::Text, Box::new(e)))?
+            totp_secret: row.get(6)?,
+            totp_enabled: row.get::<_, i64>(7)? != 0,
+            created_at: chrono::DateTime::parse_from_rfc3339(&row.get::<_, String>(8)?)
+                .map_err(|e| rusqlite::Error::FromSqlConversionFailure(8, rusqlite::types::Type::Text, Box::new(e)))?
                 .with_timezone(&chrono::Utc),
-            updated_at: chrono::DateTime::parse_from_rfc3339(&row.get::<_, String>(7)?)
-                .map_err(|e| rusqlite::Error::FromSqlConversionFailure(7, rusqlite::types::Type::Text, Box::new(e)))?
+            updated_at: chrono::DateTime::parse_from_rfc3339(&row.get::<_, String>(9)?)
+                .map_err(|e| rusqlite::Error::FromSqlConversionFailure(9, rusqlite::types::Type::Text, Box::new(e)))?
                 .with_timezone(&chrono::Utc),
         })
+    }
+
+    // ── TOTP ─────────────────────────────────────────────────────────
+
+    pub fn update_user_totp_secret(&self, user_id: &str, secret: &str) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "UPDATE users SET totp_secret = ?2, updated_at = ?3 WHERE id = ?1",
+            params![user_id, secret, chrono::Utc::now().to_rfc3339()],
+        )?;
+        debug!(user_id = %user_id, "TOTP secret updated");
+        Ok(())
+    }
+
+    pub fn enable_user_totp(&self, user_id: &str) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "UPDATE users SET totp_enabled = 1, updated_at = ?2 WHERE id = ?1",
+            params![user_id, chrono::Utc::now().to_rfc3339()],
+        )?;
+        debug!(user_id = %user_id, "TOTP enabled");
+        Ok(())
+    }
+
+    pub fn disable_user_totp(&self, user_id: &str) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "UPDATE users SET totp_enabled = 0, totp_secret = NULL, updated_at = ?2 WHERE id = ?1",
+            params![user_id, chrono::Utc::now().to_rfc3339()],
+        )?;
+        debug!(user_id = %user_id, "TOTP disabled");
+        Ok(())
     }
 
     // ── Sessions ──────────────────────────────────────────────────────

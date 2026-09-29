@@ -93,6 +93,34 @@ export class TilePanel {
   }
 
   /**
+   * Show community find results for a tile.
+   * @param {string} tileId
+   * @param {Array} finds
+   */
+  showCommunityFinds(tileId, finds) {
+    const tile = this.tiles.find(t => t.id === tileId || t.tile_id === tileId);
+    if (!tile) return;
+
+    // Add community find info to the tile card
+    const card = this.container.querySelector(`[data-tile-id="${tileId}"]`);
+    if (!card) return;
+
+    const existing = card.querySelector('.tile-community-finds');
+    if (existing) existing.remove();
+
+    if (finds.length > 0) {
+      const communityEl = createElement('div', { class: 'tile-community-finds' });
+      const latest = finds[finds.length - 1];
+      communityEl.appendChild(createElement('div', { class: 'tile-community-finds-title' }, 'Community Find'));
+      communityEl.appendChild(createElement('div', { class: 'tile-community-finds-location' },
+        `${latest.latitude.toFixed(5)}, ${latest.longitude.toFixed(5)}`));
+      communityEl.appendChild(createElement('div', { class: 'tile-community-finds-time' },
+        `Found ${timeAgo(latest.found_at)}`));
+      card.appendChild(communityEl);
+    }
+  }
+
+  /**
    * Destroy the component.
    */
   destroy() {

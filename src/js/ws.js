@@ -3,6 +3,7 @@
  */
 
 import { store } from './state.js';
+import { get } from './lib/storage.js';
 
 export class RealtimeClient {
   constructor(url) {
@@ -114,9 +115,9 @@ export class RealtimeClient {
     store.set('wsConnected', true);
 
     // Authenticate
-    const token = localStorage.getItem('amulet:auth_token');
+    const token = get('auth_token', null);
     if (token) {
-      this.send('auth', { token: JSON.parse(token) });
+      this.send('auth', { token });
     }
 
     this._startPing();
@@ -154,6 +155,9 @@ export class RealtimeClient {
           }
         }
       }
+
+      // Emit as window event for non-WS-aware components
+      window.dispatchEvent(new CustomEvent(`ws:${data.type}`, { detail: data }));
     } catch (err) {
       console.error('[WS] Message parse error:', err);
     }
