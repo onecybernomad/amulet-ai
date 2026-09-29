@@ -54,6 +54,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New frontend pages: AssistancePage with service type grid and status tracking; OnboardingPage with feature tour
 - New services: assistance service with tier gating, provider network, cost estimates
 
+### Bug Fixes & Improvements
+- Fixed Rust compilation errors: type annotations, private field access, Debug/Clone/Serialize derives
+- Fixed borrow checker issues: MutexGuard held across await points
+- Added missing imports: `chrono::{DateTime, Utc}`, `uuid::Uuid`, `sqlx::Row`
+- Fixed `DrivingSession` struct: added missing fields (`distance_km`, `max_speed`, `avg_speed`, `harsh_braking_count`, `rapid_acceleration_count`, `phone_usage_count`)
+- Fixed `create_incident` calls: wrapped coordinates in `Some()` for `Option<f64>` parameters
+- Removed `Default` impl for `RealtimeHub` (required `db_pool` argument)
+- Added `#[derive(serde::Serialize)]` to all API response structs
+- Cleaned up unused imports and variables across the codebase
+
 ---
 
 ## [0.1.0] — 2026-09-29
